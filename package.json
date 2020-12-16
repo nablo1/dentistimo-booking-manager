@@ -1,7 +1,7 @@
 {
   "name": "bookings-manager",
   "version": "1.0.0",
-  "description": "",
+  "description": "This code was in the booking portal repository. We moved it here because this component has now a much simpler responisibilty which is handling the request and response of the bookings and the availability checking",
   "main": "booking.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,5 +12,9 @@
     "url": "git@git.chalmers.se:courses/dit355/2020/group-9/bookings-manager.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^4.2.6",
+    "nodemon": "^2.0.6"
+  }
 }
