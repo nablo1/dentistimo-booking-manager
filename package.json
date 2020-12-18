@@ -1,5 +1,5 @@
 {
-  "name": "bookings-manager",
+  "name": "booking-manager",
   "version": "1.0.0",
   "description": "This code was in the booking portal repository. We moved it here because this component has now a much simpler responisibilty which is handling the request and response of the bookings and the availability checking",
   "main": "booking.js",
