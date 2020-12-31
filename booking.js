@@ -31,8 +31,8 @@ client.on('connect', function() { // When connected
                 case bookingRequest:
                     savedRequests.push(message) //save the request in the saved requests array
                     var recievedRequest = JSON.parse(String(message)) // parse the request that we just recieved
-                    console.log(recievedRequest.timeSlotId)
-                     client.publish(availabilityRequest,  recievedRequest.timeSlotId , function() { // now filter the time slot of the request and publish it
+                    console.log(recievedRequest.timeSlot_id)
+                     client.publish(availabilityRequest,  recievedRequest.timeSlot_id , function() { // now filter the time slot of the request and publish it
                         console.log("The time slot id of the request is published");
                        // client.end(); 
                     }); 
