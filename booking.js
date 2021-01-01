@@ -1,7 +1,9 @@
-var bookingRequest = 'booking/request'
-var bookingResponse = 'booking/response'
-var availabilityRequest = 'availability/request'
-var availabilityResponse = 'availability/response'
+const bookingRequest = 'booking/request'
+const bookingResponse = 'booking/response'
+const availabilityRequest = 'availability/request'
+const availabilityResponse = 'availability/response'
+const subscribedTopics = [bookingRequest, availabilityResponse]
+const savedRequests = []
 
 
 const options = {
@@ -14,25 +16,53 @@ const options = {
   connectTimeout: 30 * 1000,
   queueQoSZero: true,
   }
+
   
 const mqtt = require('mqtt')
-const client = mqtt.connect('tcp://localhost:1883', options); //port?
+const client = mqtt.connect('mqtt://localhost:1883', options); 
 client.on('connect', function() { // When connected
     console.log('connected')
 
     // subscribe to a topic
-    client.subscribe(bookingRequest,{qos:1} ,function() {
-        // when a message arrives, do something with it
+    client.subscribe(subscribedTopics,{qos:1} ,function() {
+        
         client.on('message', function(topic, message, packet) {
-            console.log("Received '" + message + "' on '" + topic + "'");
+            switch(topic) {
+                case bookingRequest:
+                    savedRequests.push(message) //save the request in the saved requests array
+                    var recievedRequest = JSON.parse(String(message)) // parse the request that we just recieved
+                    console.log(recievedRequest.timeSlot_id)
+                     client.publish(availabilityRequest,  recievedRequest.timeSlot_id , function() { // now filter the time slot of the request and publish it
+                        console.log("The time slot id of the request is published");
+                       // client.end(); 
+                    }); 
+                    break;
+
+                      case availabilityResponse:
+                        var lastRequest = JSON.parse(String(savedRequests[savedRequests.length - 1])) //get the last request of the array and parse it
+                        var userid = lastRequest.userid
+                        var requestid = lastRequest.requestid
+                        var time = lastRequest.time
+
+                         var recievedResponse = String(message)
+                         if(recievedResponse === 'Confirmed') { //if the time slot exist in the database, we get a confirmation
+                            var resString = '"userid": ' + JSON.stringify(userid) + ', "requestid": ' + JSON.stringify(requestid) + ', "time": " ' + JSON.stringify(time) + '"'
+                            client.publish(bookingResponse, resString, function() { // we publish the string above as a booking response to the client
+                                console.log("confirmed booking response is published");
+                                //client.end(); 
+                            });  
+
+                        } else { // if the time slot doesn't exist we get a rejection
+                            var resString = '"userid": ' + userid + ', "requestid": ' + requestid + '"time": none'
+                            client.publish(bookingResponse, resString, function() { // we publish the string above as a booking response to the client
+                                console.log("Rejected booking response is published");
+                                //client.end(); 
+                            });  
+
+                        }   
+            }
         });
 
     });
-/* 
-      // publish a message to a topic
-        // Instead of my message goes the request data
-         client.publish(bookingResponse, 'my message', function() {
-            console.log("Message is published");
-            client.end(); // Close the connection when published
-        });  */
+
 });
