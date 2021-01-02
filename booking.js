@@ -24,7 +24,7 @@ client.on('connect', function() { // When connected
     console.log('connected')
 
     // subscribe to a topic
-    client.subscribe(subscribedTopics,{qos:1} ,function() {
+    client.subscribe(subscribedTopics,function() {
         
         client.on('message', function(topic, message, packet) {
             switch(topic) {
@@ -32,7 +32,8 @@ client.on('connect', function() { // When connected
                     savedRequests.push(message) //save the request in the saved requests array
                     var recievedRequest = JSON.parse(String(message)) // parse the request that we just recieved
                     console.log(recievedRequest.timeSlot_id)
-                     client.publish(availabilityRequest,  recievedRequest.timeSlot_id , function() { // now filter the time slot of the request and publish it
+                     client.publish(availabilityRequest,  recievedRequest.timeSlot_id ,{qos:2} , function() { // now filter the time slot id of the request and publish it
+                        //QoS 2 becuase the message we're sending triggers the availabaility checker to delete the time slot from the databse. so it's not safe to send dupliacte messages
                         console.log("The time slot id of the request is published");
                        // client.end(); 
                     }); 
@@ -45,16 +46,16 @@ client.on('connect', function() { // When connected
                         var time = lastRequest.time
 
                          var recievedResponse = String(message)
-                         if(recievedResponse === 'Confirmed') { //if the time slot exist in the database, we get a confirmation
+                         if(recievedResponse === 'Confirmed') { //if the time slot exists in the database, we get a confirmation
                             var resString = '"userid": ' + JSON.stringify(userid) + ', "requestid": ' + JSON.stringify(requestid) + ', "time": " ' + JSON.stringify(time) + '"'
-                            client.publish(bookingResponse, resString, function() { // we publish the string above as a booking response to the client
+                            client.publish(bookingResponse, resString,{qos:1} , function() { // we publish the string above as a booking response to the client
                                 console.log("confirmed booking response is published");
                                 //client.end(); 
                             });  
 
                         } else { // if the time slot doesn't exist we get a rejection
                             var resString = '"userid": ' + userid + ', "requestid": ' + requestid + '"time": none'
-                            client.publish(bookingResponse, resString, function() { // we publish the string above as a booking response to the client
+                            client.publish(bookingResponse, resString,{qos:1} , function() { // we publish the string above as a booking response to the client
                                 console.log("Rejected booking response is published");
                                 //client.end(); 
                             });  
