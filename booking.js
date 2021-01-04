@@ -33,7 +33,7 @@ client.on('connect', function() { // When connected
                     var recievedRequest = JSON.parse(String(message)) // parse the request that we just recieved
                     console.log(recievedRequest.timeSlot_id)
                      client.publish(availabilityRequest,  recievedRequest.timeSlot_id ,{qos:2} , function() { // now filter the time slot id of the request and publish it
-                        //QoS 2 becuase the message we're sending a message that triggers the availabaility checker to delete the time slot from the databse. so it's not safe to send dupliacte messages
+                        //QoS=2 becuase we're sending a message that triggers the availabaility checker to delete the time slot from the databse. so it's not safe to send dupliacte messages
                         console.log("The time slot id of the request is published");
                        // client.end(); 
                     }); 
@@ -54,7 +54,7 @@ client.on('connect', function() { // When connected
                             });  
 
                         } else { // if the time slot doesn't exist we get a rejection
-                        var resString = '"userid": ' + userid + ', "requestid": ' + requestid + '"time": none' + '/n Your booking has been rejected! Please select another time slot!'
+                        var resString = '"userid": ' + userid + ', "requestid": ' + requestid + '"time": none' + '/n Your booking has been rejected! Please select another time slot.'
                             client.publish(bookingResponse, resString,{qos:1} , function() { // we publish the string above as a booking response to the client
                                 console.log("Rejected booking response is published");
                                 //client.end(); 
